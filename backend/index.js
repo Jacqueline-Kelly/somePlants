@@ -1,5 +1,8 @@
 const path = require('path');
 const express = require('express');
+const { pool, prepareDB } = require('../database/db.js');
+
+// prepareDB(pool) // uncomment to recreate db
 
 const app = express();
 
