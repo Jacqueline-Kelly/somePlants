@@ -20,10 +20,10 @@ const dataPath = path.join(__dirname, "../../../Downloads/usdaplants.csv");
 
 const prepareDB = async(pool) => {
   try {
-    await pool.query("DROP TABLE IF EXISTS usda, comments, zipcode_plant, tags CASCADE")
+    await pool.query("DROP TABLE IF EXISTS usda, comments, zipcodes_plants, tags CASCADE")
     console.log('Dropped all tables')
 
-    executeQuery(pool, buildUSDATableCommand, buildZipcode_PlantsTableCommand, buildCommentsTableCommand, buildTagsTableCommand, () => readData(insert)) // all tables are dependent on the USDA table, and once USDA table is built we can also read and then insert the data from starter csv file
+    executeQuery(pool, buildUSDATableCommand, buildZipcodes_PlantssTableCommand, buildCommentsTableCommand, buildTagsTableCommand, () => readData(insert)) // all tables are dependent on the USDA table, and once USDA table is built we can also read and then insert the data from starter csv file
 
   } catch(err) {
     console.log(err);
@@ -56,7 +56,7 @@ const readData = (cb) => {
       rawData.push(row);
     })
     .on("end", () => {
-      console.log("FINISHED PARSING")
+      console.log("Finished parsing")
       cb()
     })
     .on("error" , (err) => {
@@ -66,11 +66,11 @@ const readData = (cb) => {
 
 // extract relevant data and insert to postgres
 const insert = () => {
-  console.log('inserting to database');
+  console.log('Inserting to database');
 
   let insertPromises = rawData.map((plant) => new Promise((resolve, reject) =>
       pool.connect().then(client => {
-        client.query('INSERT INTO usda(id, scientific_name, common_name) VALUES($1, $2, $3);', [plant["betydb.species.id"], plant.ScientificName, plant.CommonName])
+        client.query('INSERT INTO usda(id, scientific_name, common_name) VALUES($1, $2, $3);', [plant["betydb.species.id"], plant.ScientificName.toLowerCase(), plant.CommonName.toLowerCase()])
         .then(() => {
           client.release();
           resolve();
@@ -89,13 +89,12 @@ const insert = () => {
 
 const buildUSDATableCommand = "CREATE TABLE usda (id SERIAL PRIMARY KEY UNIQUE NOT NULL, scientific_name VARCHAR(100) NOT NULL, common_name VARCHAR(100) NOT NULL)";
 
-const buildZipcode_PlantsTableCommand = "CREATE TABLE zipcode_plant(id SERIAL PRIMARY KEY UNIQUE NOT NULL, submission_count int NOT NULL DEFAULT 1, usda_id INT REFERENCES usda(id) NOT NULL, zipCode VARCHAR(5) NOT NULL)";
+const buildZipcodes_PlantssTableCommand = "CREATE TABLE zipcodes_plants(id SERIAL PRIMARY KEY UNIQUE NOT NULL, submission_count int NOT NULL DEFAULT 1, usda_id INT REFERENCES usda(id) NOT NULL, zipcode VARCHAR(5) NOT NULL)";
 
-const buildCommentsTableCommand = "CREATE TABLE comments (id SERIAL PRIMARY KEY UNIQUE NOT NULL, comment text NOT NULL, zipcode_plant_id INT NOT NULL REFERENCES zipcode_plant(id))";
+const buildCommentsTableCommand = "CREATE TABLE comments (id SERIAL PRIMARY KEY UNIQUE NOT NULL, comment text NOT NULL, zipcodes_plants_id INT NOT NULL REFERENCES zipcodes_plants(id))";
 
-const buildTagsTableCommand = "CREATE TABLE tags(id SERIAL PRIMARY KEY UNIQUE NOT NULL, characteristic VARCHAR(50) NOT NULL, zipcode_id INT REFERENCES zipcode_plant(id) NOT NULL)"
+const buildTagsTableCommand = "CREATE TABLE tags(id SERIAL PRIMARY KEY UNIQUE NOT NULL, characteristic VARCHAR(50) NOT NULL, zipcode_id INT REFERENCES zipcodes_plants(id) NOT NULL)"
 
-// prepareDB(pool);
 
 module.exports.pool = pool;
 module.exports.prepareDB = prepareDB;
