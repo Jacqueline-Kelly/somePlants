@@ -6,6 +6,11 @@ import PlantCard from "../components/plantcard.jsx";
 const Search = () => {
   const [zipcode, setZipcode] = useState("");
   const [results, setResults] = useState([]);
+  const [message, setMessage] = useState("");
+
+  const resetMessage = () => {
+    setTimeout(() => setMessage(''), 5000);
+  }
 
   const onChange = (e) => {
     e.preventDefault();
@@ -15,9 +20,16 @@ const Search = () => {
 
   const onClick = (e) => {
     e.preventDefault();
-    console.log('clicked!', zipcode)
     axios.get('/api', {params: {zipcode: zipcode}})
-    .then(res => setResults(res.data))
+    .then(res => {
+      if (res.data.length) {
+        setResults(res.data)
+      } else {
+        setMessage(`No one has submitted native plants for your zipCode yet.
+        Do some research, and then submit one to help out your community!`);
+        resetMessage();
+      }
+    })
     .catch(err => console.log(err))
   }
 
@@ -30,6 +42,7 @@ const Search = () => {
           <FaAngleRight size="2rem" className="arrowButton" onClick={onClick}/>
         </div>
       </div>
+      {message.length ? <h2>{message}</h2> : null}
       {results.length ?
         results.map((item, index) => <PlantCard key={index} plant={item}/>)
       : null}
