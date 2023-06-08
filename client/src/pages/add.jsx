@@ -1,14 +1,16 @@
-import React, {useState, useEffect} from 'react';
-import axios from 'axios';
+import React, {useState, useEffect} from "react";
+import axios from "axios";
 
 const Add = () => {
   const [form, setForm] = useState({
-    name: '',
-    version: '',
-    zipcode: '',
+    name: "",
+    version: "",
+    zipcode: "",
+    tags: []
   })
 
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
+  const [allTags, setAllTags] = useState({pollinator: 0, flowering: 0, "drought tolerant": 0, perennial: 0, annual: 0, aromatic: 0, "ground cover": 0, "shade provider": 0, colorful: 0, edible: 0, medicinal: 0})
 
   const { name, version, zipcode } = form;
 
@@ -28,26 +30,36 @@ const Add = () => {
     }))
   }
 
+  const onClickTag = (e) => {
+    e.preventDefault();
+    let id = e.target.id;
+    setAllTags((prevState) => ({
+      ...prevState,
+      [id]: !prevState[id]
+    }))
+    console.log(allTags)
+  }
+
   const resetMessage = () => {
-    setTimeout(() => setMessage(''), 3000);
+    setTimeout(() => setMessage(""), 3000);
   }
 
   const onSubmit = (e) => {
     e.preventDefault();
     if (!version || !name || !zipcode || (zipcode.length !== 5)) {
-      setMessage('Please fill out all fields before submitting.');
+      setMessage("Please fill out all fields before submitting.");
       resetMessage()
       return;
     }
 
-    axios.post('/api', {name: form.name.toLowerCase(), version: form.version, zipcode: form.zipcode})
+    axios.post("/api", {name: form.name.toLowerCase(), version: form.version, zipcode: form.zipcode})
     .then(res => {
       setMessage(res.data);
       resetMessage();
       setForm({
-        name: '',
-        version: '',
-        zipcode: '',
+        name: "",
+        version: "",
+        zipcode: "",
       })
     })
     .catch(err => {
@@ -56,7 +68,11 @@ const Add = () => {
     })
   }
 
-  return(
+  useEffect(() => {
+
+  }, [allTags])
+
+  return (
     <div className="main">
       <h1>Add a Plant Native to Your Area ✨</h1>
       {message.length ? <h2>{message}</h2> : null}
@@ -72,6 +88,16 @@ const Add = () => {
             </select>
             <label>ZIP Code</label>
             <input id="zipcode" value={zipcode} className="inputBox" maxLength="5" onChange={onChange} />
+            <label>Optional! Add some characteristics of this plant</label>
+            <div className="plantCardContainer">
+              {Object.keys(allTags).map((key, idx) =>
+                <div className={allTags[key] ? "tagItem selected" : "tagItem"}
+                key={idx}
+                id={key}
+                onClick={onClickTag}>
+                  {key}
+                </div>)}
+            </div>
             <button>Submit your plant</button>
         </form>
       </div>
