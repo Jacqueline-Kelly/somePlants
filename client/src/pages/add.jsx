@@ -52,13 +52,12 @@ const Add = () => {
       return acc;
     }, []);
 
-    console.log(selectedTags)
     if (!version || !name || !zipcode || (zipcode.length !== 5)) {
       setMessage("Please fill out all fields before submitting.");
       resetMessage()
       return;
     }
-
+    console.log(selectedTags)
     axios.post("/api", {name: form.name.toLowerCase(), version: form.version, zipcode: form.zipcode, tags: selectedTags})
     .then(res => {
       setMessage(res.data);

@@ -93,7 +93,7 @@ const buildZipcodes_PlantssTableCommand = "CREATE TABLE zipcodes_plants(id SERIA
 
 const buildCommentsTableCommand = "CREATE TABLE comments (id SERIAL PRIMARY KEY UNIQUE NOT NULL, comment text NOT NULL, zipcodes_plants_id INT NOT NULL REFERENCES zipcodes_plants(id))";
 
-const buildTagsTableCommand = "CREATE TABLE tags(id SERIAL PRIMARY KEY UNIQUE NOT NULL, characteristic VARCHAR(50) NOT NULL, zipcode_id INT REFERENCES zipcodes_plants(id) NOT NULL)"
+const buildTagsTableCommand = "CREATE TABLE tags(id SERIAL PRIMARY KEY UNIQUE NOT NULL, tag VARCHAR(50) NOT NULL, zipcodes_plants_id INT REFERENCES zipcodes_plants(id) NOT NULL)"
 
 
 module.exports.pool = pool;
