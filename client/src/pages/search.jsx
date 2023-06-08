@@ -42,10 +42,15 @@ const Search = () => {
           <FaAngleRight size="2rem" className="arrowButton" onClick={onClick}/>
         </div>
       </div>
+
       {message.length ? <h2>{message}</h2> : null}
-      {results.length ?
-        results.map((item, index) => <PlantCard key={index} plant={item}/>)
-      : null}
+
+      <div className="plantCardContainer">
+        {results.length ?
+          results.map((item, index) => <PlantCard key={index} plant={item}/>)
+        : null}
+      </div>
+
     </div>
   )
 }
