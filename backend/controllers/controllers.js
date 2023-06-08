@@ -1,16 +1,20 @@
 const { pool } = require('../../database/db.js');
+const format = require('pg-format');
 
 module.exports.postPlant = (req, res) => {
   let usda_id;
   try {
     const { name, version, zipcode } = req.body;
-    pool.query("SELECT * FROM usda WHERE scientific_name = $1;", [name]) // find this submission's plant's usda id
+    let sqlQuery = format("SELECT * FROM usda WHERE %I = %L;", version, name)
+    pool.query(sqlQuery) // find this submission's plant's usda id
     .catch(err => {
       throw new Error (err);
     })
     .then((data) => {
+
       if (!data.rows.length) {
-        throw new Error ('Could not find plant with this name!')
+        res.status(400).send('Could not find plant with this name!');
+        return
       }
 
       usda_id = data.rows[0].id;
@@ -21,7 +25,7 @@ module.exports.postPlant = (req, res) => {
         if (data.rows[0].count === "0") { // inserting new native plant to this zip code!
           pool.query("INSERT INTO zipcodes_plants(usda_id, zipcode) VALUES ($1, $2) RETURNING id;", [usda_id, zipcode])
           .then((data) => {
-            res.status(201).send({id: data.rows[0].id});
+            res.status(201).send("Sucessfully added this plant to your zipcode's native list!");
           })
           .catch(err => {
             throw new Error (err);
@@ -30,7 +34,7 @@ module.exports.postPlant = (req, res) => {
 
           pool.query("UPDATE zipcodes_plants SET submission_count = submission_count + 1 WHERE usda_id = $1 AND zipcode = $2 RETURNING id;", [usda_id, zipcode])
           .then((data) => {
-            res.status(201).send({id: data.rows[0].id});
+            res.status(201).send("Awesome! This plant has already been reported to be native in your area.");
           })
           .catch(err => {
             throw new Error (err.stack);
