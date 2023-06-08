@@ -24,7 +24,7 @@ const Add = () => {
   const onSelect = (option) => {
     let val = option.value;
     setForm((prevState) => ({...prevState,
-    version: val.toLowerCase()
+    version: val
     }))
   }
 
@@ -40,10 +40,15 @@ const Add = () => {
       return;
     }
 
-    axios.post('/api', form)
+    axios.post('/api', {name: form.name.toLowerCase(), version: form.version, zipcode: form.zipcode})
     .then(res => {
       setMessage(res.data);
       resetMessage();
+      setForm({
+        name: '',
+        version: '',
+        zipcode: '',
+      })
     })
     .catch(err => {
       setMessage(err.response.data);
@@ -55,8 +60,8 @@ const Add = () => {
     <div className="main">
       <h1>Add a Plant Native to Your Area ✨</h1>
       {message.length ? <h2>{message}</h2> : null}
-      <div className="formContainer">
-        <form className="postForm" onSubmit={onSubmit}>
+      <div className="formContainer ">
+        <form style={{display: "grid"}} onSubmit={onSubmit}>
             <label>Plant Name</label>
             <input id="name" value={name} className="inputBox" onChange={onChange} />
             <label>Version</label>
@@ -66,7 +71,7 @@ const Add = () => {
               <option value="scientific_name">Scientific</option>
             </select>
             <label>ZIP Code</label>
-            <input id="zipcode" value={zipcode} className="inputBox" onChange={onChange} />
+            <input id="zipcode" value={zipcode} className="inputBox" maxLength="5" onChange={onChange} />
             <button>Submit your plant</button>
         </form>
       </div>

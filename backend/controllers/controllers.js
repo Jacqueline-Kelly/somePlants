@@ -49,8 +49,13 @@ module.exports.postPlant = (req, res) => {
 
 module.exports.getZipcode = (req, res) => {
   try {
-    res.status(200);
+    const { zipcode } = req.query;
+    pool.query("SELECT scientific_name, common_name, submission_count, usda_id, zipcode FROM usda INNER JOIN zipcodes_plants ON usda_id = usda.id WHERE zipcodes_plants.zipcode = $1;", [zipcode])
+    .then((data) => {
+      res.status(200).send(data.rows);
+    })
   } catch(err) {
     res.status(501);
   }
 }
+
