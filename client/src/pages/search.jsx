@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 import { FaAngleRight } from "react-icons/Fa";
 import PlantCard from "../components/plantcard.jsx";
@@ -8,8 +8,10 @@ const Search = () => {
   const [results, setResults] = useState([]);
   const [message, setMessage] = useState("");
 
+  const timer = useRef();
+
   const resetMessage = () => {
-    setTimeout(() => setMessage(''), 5000);
+    timer.current = setTimeout(() => setMessage(''), 5000);
   }
 
   const onChange = (e) => {
@@ -20,10 +22,14 @@ const Search = () => {
 
   const onClick = (e) => {
     e.preventDefault();
+    setMessage("");
+    setResults([]);
     axios.get('/api', {params: {zipcode: zipcode}})
     .then(res => {
       if (res.data.length) {
-        setResults(res.data)
+        setMessage(`Plants submitted as native to zipCode ${zipcode}:`);
+        clearTimeout(timer.current)
+        setResults(res.data);
       } else {
         setMessage(`No one has submitted native plants for your zipCode yet.
         Do some research, and then submit one to help out your community!`);

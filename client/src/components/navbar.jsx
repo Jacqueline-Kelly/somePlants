@@ -8,8 +8,6 @@ const NavBar = () => {
 
   const onClick = (e, loc) => {
     e.preventDefault();
-    // let newLocation = e.target.id;
-    console.log(loc);
     navigate(loc);
   }
 
