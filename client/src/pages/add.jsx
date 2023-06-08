@@ -6,7 +6,6 @@ const Add = () => {
     name: "",
     version: "",
     zipcode: "",
-    tags: []
   })
 
   const [message, setMessage] = useState("");
@@ -37,7 +36,6 @@ const Add = () => {
       ...prevState,
       [id]: !prevState[id]
     }))
-    console.log(allTags)
   }
 
   const resetMessage = () => {
@@ -46,13 +44,22 @@ const Add = () => {
 
   const onSubmit = (e) => {
     e.preventDefault();
+
+    const selectedTags = Object.keys(allTags).reduce((acc, key) => {
+      if (allTags[key]) {
+        acc.push(key);
+      }
+      return acc;
+    }, []);
+
+    console.log(selectedTags)
     if (!version || !name || !zipcode || (zipcode.length !== 5)) {
       setMessage("Please fill out all fields before submitting.");
       resetMessage()
       return;
     }
 
-    axios.post("/api", {name: form.name.toLowerCase(), version: form.version, zipcode: form.zipcode})
+    axios.post("/api", {name: form.name.toLowerCase(), version: form.version, zipcode: form.zipcode, tags: selectedTags})
     .then(res => {
       setMessage(res.data);
       resetMessage();
@@ -61,16 +68,13 @@ const Add = () => {
         version: "",
         zipcode: "",
       })
+      setAllTags({pollinator: 0, flowering: 0, "drought tolerant": 0, perennial: 0, annual: 0, aromatic: 0, "ground cover": 0, "shade provider": 0, colorful: 0, edible: 0, medicinal: 0})
     })
     .catch(err => {
       setMessage(err.response.data);
       resetMessage();
     })
   }
-
-  useEffect(() => {
-
-  }, [allTags])
 
   return (
     <div className="main">
